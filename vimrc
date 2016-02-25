@@ -185,4 +185,4 @@ function! AddPyHeader()
 endf
 
 " 保存并运行当前脚本
-autocmd BufRead *.py nmap <F5> :w<esc>:!python %<CR>
+autocmd BufRead *.py nmap <F6> :w<esc>:!python %<CR>
