@@ -16,6 +16,8 @@ Plugin 'gmarik/Vundle.vim'
 
 " Add all your plugins here (note older versions of Vundle used Bundle instead of Plugin)
 
+Bundle 'Valloric/YouCompleteMe'
+
 " All of your Plugins must be added before the following line
 call vundle#end()           " required
 
@@ -37,8 +39,8 @@ set nowrapscan              " 搜索到文件两端时不重新搜索
 set cursorline              " 突出显示当前行
 
 set autoindent              " 自动对齐
-set expandtab               " 将Tab自动转化成空格 [需要输入真正的Tab键时，使用 Ctrl+V + Tab]
-set tabstop=4               " 设置Tab键的宽度 [等同的空格个数]
+set expandtab               " 将 Tab 自动转化成空格 [需要输入真正的 Tab 键时，使用 Ctrl+V + Tab]
+set tabstop=4               " 设置 Tab 键的宽度 [等同的空格个数]
 set softtabstop=4           " 按退格键时可以一次删掉 4 个空格
 set shiftwidth=4            " 每一次缩进对应的空格数
 
@@ -46,12 +48,22 @@ set scrolloff=7             " 在上下移动光标时，光标的上方或下�
 set laststatus=2            " 总是显示底部 2 行的状态栏
 set wildignore=*.pyc        " 忽略文件
 
+" 允许回退
+:set backspace=indent,eol,start
+
 " 设置文件编码和文件格式
 set fenc=utf-8
 set encoding=utf-8
 set fileencodings=utf-8,gbk,cp936,latin-1
 set fileformat=unix
 set fileformats=unix,mac,dos
+
+" 隐藏 Macvim 滚动条
+set guioptions-=l
+set guioptions-=L
+set guioptions-=r
+set guioptions-=R
+set guifont=Menlo_Regular:h12
 
 " 取消备份，视情况自己改
 set nobackup
@@ -69,12 +81,12 @@ syntax on
 " 目录树插件
 Plugin 'nerdtree'
 Plugin 'vim-nerdtree-tabs'
-let g:nerdtree_tabs_open_on_console_startup=1       " 设置打开vim的时候默认打开目录树
+let g:nerdtree_tabs_open_on_console_startup=0       " 设置打开 Vim 的时候是否打开目录树
 
-" 空格键折叠代码
+" 折叠代码
 Plugin 'SimpylFold'
-nnoremap <space> za
 let g:SimpylFold_docstring_preview=1
+set foldlevel=9999
 
 " 设置可以高亮的关键字
 if has("autocmd")
@@ -85,19 +97,27 @@ if has("autocmd")
     endif
 endif
 
+" 代码补全设置
+set completeopt=longest,menu "让 Vim 的补全菜单行为与一般IDE一致(参考VimTip1228)
+autocmd InsertLeave * if pumvisible() == 0|pclose|endif "离开插入模式后自动关闭预览窗口
+inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>" "回车即选中当前项
+
 
 
 " ================================
 "             键位映射
 " ================================
-" 修改leader键
+" 修改 Leader 键
 let mapleader = '\'
 let g:mapleader = '\'
 
 " 开关目录树
 map <F10> :NERDTreeTabsToggle<CR>
 
-" 一键替换全部Tab为空格
+" 空格键折叠代码
+nnoremap <space> za
+
+" 一键替换全部 Tab 为空格
 func! RemoveTabs()
     if &shiftwidth == 2
         exec '%s/	/  /g'
@@ -115,7 +135,7 @@ imap <leader>rt <esc>:call RemoveTabs()<cr>
 nmap <leader>rt :call RemoveTabs()<cr>
 vmap <leader>rt <esc>:call RemoveTabs()<cr>
 
-" normal 模式下切换到确切的tab
+" Normal 模式下切换到确切的Tab
 nnoremap <leader>1 1gt
 nnoremap <leader>2 2gt
 nnoremap <leader>3 3gt
@@ -126,7 +146,8 @@ nnoremap <leader>7 7gt
 nnoremap <leader>8 8gt
 nnoremap <leader>9 9gt
 nnoremap <leader>0 :tablast<cr>
-" 新建tab  Ctrl+t
+
+" 新建 Tab  Ctrl+t
 nnoremap <C-t>     :tabnew<CR>
 inoremap <C-t>     <Esc>:tabnew<CR>
 
@@ -136,8 +157,11 @@ nnoremap ; :
 " 去掉搜索高亮
 noremap <silent><leader>/ :nohls<CR>
 
-" 使用 U 替代 <C-r>，更容易执行 redo 操作
+" 使用 U 替代 <C-r>，更容易执行 Redo 操作
 nnoremap U <C-r>
+
+" 切换注释
+map <C-c> <leader>c<space>
 
 
 
@@ -151,20 +175,23 @@ Plugin 'indentpython.vim'
 Plugin 'vim-flake8'
 let python_highlight_all=1
     
-function RunPython()
-    exec "w"
-    exec "!python3 %:t"
-endf
+" 注释
+Plugin 'scrooloose/nerdcommenter'
 
 " 新建 py 文件时，自动插入文件头
 autocmd BufNewFile *.py exec ":call AddPyHeader()"
-function! AddPyHeader()
+function! AddPyHeader
     call setline(1, "\#!/usr/bin/env python")
     call append(1, "\# encoding: utf-8")
 
     normal G
     normal o
     normal o
+endf
+
+function RunPython()
+    exec "w"
+    exec "!python3 %:t"
 endf
 
 au FileType python  call ConfigPython()
