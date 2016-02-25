@@ -167,15 +167,11 @@ Plugin 'indentpython.vim'
 " 语法检查，着色
 Plugin 'vim-flake8'
 let python_highlight_all=1
+
+Plugin 'virtualenv.vim'
     
 " 注释
 Plugin 'scrooloose/nerdcommenter'
-
-
-function! RunPython()
-    exec "w"
-    exec "!python3 %:t"
-endf
 
 " 新建 py 文件时，自动插入文件头
 autocmd BufNewFile *.py exec ":call AddPyHeader()"
@@ -188,10 +184,5 @@ function! AddPyHeader()
     normal o
 endf
 
-au FileType python  call ConfigPython()
-function! ConfigPython()
-    " 保存并运行 Python 脚本
-    command! Run :call RunPython()
-endf
-
-
+" 保存并运行当前脚本
+autocmd BufRead *.py nmap <F5> :w<esc>:!python %<CR>
